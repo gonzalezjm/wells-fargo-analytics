@@ -30,7 +30,9 @@
 
       </header>
       <section>
-        <p>In order to attain a workable dataset, we import dataset.txt into a data frame, then clean the FullText column of non-ASCII characters, punctuation, and other “trouble” terms we might come across, such as words with no meaningful value in the context of the analysis. We then add a column to our data frame called “BankID”, which allows us to keep track of which bank each comment references. </p>
+        <p><img src="http://i.imgur.com/UBQ4LBQ.png" alt="Process-Diagram-img"></p>
+
+<p>In order to attain a workable dataset, we import dataset.txt into a data frame, then clean the FullText column of non-ASCII characters, punctuation, and other “trouble” terms we might come across, such as words with no meaningful value in the context of the analysis. We then add a column to our data frame called “BankID”, which allows us to keep track of which bank each comment references. </p>
 
 <p>Once we have our data properly sorted, we create five Document-Term Matrices and five Term-Document Matrices; one of each for the entire dataset, and one of each for each bank. Using the Document-Term matrices, we can analyze the frequencies at which each term appears in the dataset, in the entire dataset or within the context of a specific bank. This allows us to see the most commonly used words, and consequently, the most commonly referenced topics.</p>
 
