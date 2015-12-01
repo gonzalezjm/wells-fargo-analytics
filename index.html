@@ -30,7 +30,13 @@
 
       </header>
       <section>
-        <h3>
+        <p>In order to attain a workable dataset, we import dataset.txt into a data frame, then clean the FullText column of non-ASCII characters, punctuation, and other “trouble” terms we might come across, such as words with no meaningful value in the context of the analysis. We then add a column to our data frame called “BankID”, which allows us to keep track of which bank each comment references. </p>
+
+<p>Once we have our data properly sorted, we create five Document-Term Matrices and five Term-Document Matrices; one of each for the entire dataset, and one of each for each bank. Using the Document-Term matrices, we can analyze the frequencies at which each term appears in the dataset, in the entire dataset or within the context of a specific bank. This allows us to see the most commonly used words, and consequently, the most commonly referenced topics.</p>
+
+<p>Each comment is scored on its “sentiment” by matching the terms in the comment to two libraries of “positive” and “negative” terms. Each score is found by subtracting the number of negative terms in the comment from the number of positive terms in the comment. We then use “very positive” (score &gt; 1) and “very negative” (score &lt; -1) scores to calculate the global score using the formula GlobalScore = 100 * verypos / (verypos + veryneg).</p>
+
+<h3>
 <a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
 
 <p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here <a href="https://guides.github.com/features/mastering-markdown/">using GitHub Flavored Markdown</a>, select a template crafted by a designer, and publish. After your page is generated, you can check out the new <code>gh-pages</code> branch locally. If you’re using GitHub Desktop, simply sync your repository and you’ll see the new branch.</p>
