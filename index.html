@@ -103,8 +103,8 @@ library(<span class="pl-smi">tm</span>)
 
 <p>Once we had a set of words that we were content with, we found the frequent terms, created a word cloud and created a cluster dendrogram for the data as a whole. The code snippets below show how we were able to achieve that.</p>
 
-<h2>
-<a id="finding-frequent-terms" class="anchor" href="#finding-frequent-terms" aria-hidden="true"><span class="octicon octicon-link"></span></a>Finding frequent terms:</h2>
+<h1>
+<a id="finding-frequent-terms" class="anchor" href="#finding-frequent-terms" aria-hidden="true"><span class="octicon octicon-link"></span></a>Finding frequent terms:</h1>
 
 <div class="highlight highlight-source-r"><pre><span class="pl-smi">tdm</span> <span class="pl-k">&lt;-</span> TermDocumentMatrix(<span class="pl-smi">docs</span>)
 <span class="pl-smi">dtm</span> <span class="pl-k">&lt;-</span> DocumentTermMatrix(<span class="pl-smi">docs</span>)
@@ -119,23 +119,23 @@ findFreqTerms(<span class="pl-smi">dtm</span>,<span class="pl-c1">2000</span>)
 
 <span class="pl-v">dtm</span> <span class="pl-k">=</span> removeSparseTerms(<span class="pl-smi">dtm</span>, <span class="pl-c1">0.98</span>)</pre></div>
 
-<h2>
-<a id="creating-a-word-cloud" class="anchor" href="#creating-a-word-cloud" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a word cloud:</h2>
+<h1>
+<a id="creating-a-word-cloud" class="anchor" href="#creating-a-word-cloud" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a word cloud:</h1>
 
 <div class="highlight highlight-source-r"><pre>library(<span class="pl-smi">wordcloud</span>)   
 set.seed(<span class="pl-c1">142</span>)   
 <span class="pl-smi">dark2</span> <span class="pl-k">&lt;-</span> brewer.pal(<span class="pl-c1">6</span>, <span class="pl-s"><span class="pl-pds">"</span>Dark2<span class="pl-pds">"</span></span>)  
 wordcloud(names(<span class="pl-smi">freq</span>), <span class="pl-smi">freq</span>, <span class="pl-v">max.words</span><span class="pl-k">=</span><span class="pl-c1">100</span>, <span class="pl-v">rot.per</span><span class="pl-k">=</span><span class="pl-c1">0.2</span>, <span class="pl-v">colors</span><span class="pl-k">=</span><span class="pl-smi">dark2</span>) <span class="pl-c"># 100 most frequent words</span></pre></div>
 
-<h1>
-<a id="word-cloud" class="anchor" href="#word-cloud" aria-hidden="true"><span class="octicon octicon-link"></span></a>Word Cloud</h1>
+<h3>
+<a id="word-cloud" class="anchor" href="#word-cloud" aria-hidden="true"><span class="octicon octicon-link"></span></a>Word Cloud</h3>
 
 <p><img src="http://i.imgur.com/29NPvyZ.png" alt="Word-Cloud-img"></p>
 
-<h2>
-<a id="creating-a-cluster-dendrogram" class="anchor" href="#creating-a-cluster-dendrogram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a cluster dendrogram:</h2>
+<h1>
+<a id="creating-a-cluster-dendrogram" class="anchor" href="#creating-a-cluster-dendrogram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a cluster dendrogram:</h1>
 
-<div class="highlight highlight-source-r"><pre><span class="pl-smi">dtmss</span> <span class="pl-k">&lt;-</span> removeSparseTerms(<span class="pl-smi">dtm</span>, <span class="pl-c1">0.98</span>) 
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">dtmss</span> <span class="pl-k">&lt;-</span> removeSparseTerms(<span class="pl-smi">dtm</span>, <span class="pl-c1">0.96</span>) 
 <span class="pl-c">#inspect(dtmss)</span>
 
 library(<span class="pl-smi">cluster</span>)   
@@ -147,8 +147,8 @@ plot(<span class="pl-smi">fit</span>, <span class="pl-v">hang</span><span class=
 <span class="pl-smi">groups</span> <span class="pl-k">&lt;-</span> cutree(<span class="pl-smi">fit</span>, <span class="pl-v">k</span><span class="pl-k">=</span><span class="pl-c1">5</span>)   <span class="pl-c"># "k=" defines the number of clusters you are using   </span>
 rect.hclust(<span class="pl-smi">fit</span>, <span class="pl-v">k</span><span class="pl-k">=</span><span class="pl-c1">5</span>, <span class="pl-v">border</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>red<span class="pl-pds">"</span></span>) <span class="pl-c"># draw dendogram with red borders around the 5 clusters  </span></pre></div>
 
-<h2>
-<a id="cluster-dendrogram" class="anchor" href="#cluster-dendrogram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cluster Dendrogram</h2>
+<h3>
+<a id="cluster-dendrogram" class="anchor" href="#cluster-dendrogram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cluster Dendrogram</h3>
 
 <p><img src="http://i.imgur.com/U3k8IkR.png" alt="Cluster-Dendrogram-img"></p>
 
