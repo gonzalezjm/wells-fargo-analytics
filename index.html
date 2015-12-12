@@ -244,6 +244,11 @@ findAssocs(<span class="pl-smi">dtmA</span>, c(<span class="pl-s"><span class="p
 
 <p><img src="http://i.imgur.com/5BLy3oM.png" alt="Word-AssociationsA-img"></p>
 
+<p>Above are the word associations for Bank A. Like before, you can make hypothesis' about what topics are discussed frequently about Bank A.</p>
+
+<h2>
+<a id="frequent-terms-bar-graph-for-bank-a" class="anchor" href="#frequent-terms-bar-graph-for-bank-a" aria-hidden="true"><span class="octicon octicon-link"></span></a>Frequent Terms Bar Graph for Bank A</h2>
+
 <div class="highlight highlight-source-r"><pre><span class="pl-c">#create bar graph for the most frequently used terms</span>
 <span class="pl-smi">freq.termsA</span> <span class="pl-k">&lt;-</span> findFreqTerms(<span class="pl-smi">tdmA</span>, <span class="pl-v">lowfreq</span> <span class="pl-k">=</span> <span class="pl-c1">50</span>)
 <span class="pl-smi">termA.freq</span> <span class="pl-k">&lt;-</span> rowSums(as.matrix(<span class="pl-smi">tdmA</span>))
@@ -262,9 +267,122 @@ ggplot(<span class="pl-smi">df.A</span>, aes(<span class="pl-v">x</span> <span c
 
 <p>The bar graph above shows the terms that are used 50 times or more in the data set for Bank A.</p>
 
-<p>Once we have our data properly sorted, we create five Document-Term Matrices and five Term-Document Matrices; one of each for the entire dataset, and one of each for each bank. Using the Document-Term matrices, we can analyze the frequencies at which each term appears in the dataset, in the entire dataset or within the context of a specific bank. This allows us to see the most commonly used words, and consequently, the most commonly referenced topics.</p>
+<h1>
+<a id="sentiment-analysis" class="anchor" href="#sentiment-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sentiment Analysis</h1>
 
-<p>Each comment is scored on its “sentiment” by matching the terms in the comment to two libraries of “positive” and “negative” terms. Each score is found by subtracting the number of negative terms in the comment from the number of positive terms in the comment. We then use “very positive” (score &gt; 1) and “very negative” (score &lt; -1) scores to calculate the global score using the formula GlobalScore = 100 * verypos / (verypos + veryneg).</p>
+<p>Next, we did a "sentiment" analysis, which helps to judge if a comment was positive or negative. Each comment is scored on its “sentiment” by matching the terms in the comment to two libraries of “positive” and “negative” terms. Each score is found by subtracting the number of negative terms in the comment from the number of positive terms in the comment. We then use “very positive” (score &gt; 1) and “very negative” (score &lt; -1) scores to calculate the global score using the formula GlobalScore = 100 * verypos / (verypos + veryneg). </p>
+
+<h2>
+<a id="set-up-for-sentiment-analysis" class="anchor" href="#set-up-for-sentiment-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Set-up for Sentiment Analysis</h2>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-smi">pos</span> <span class="pl-k">&lt;-</span> scan(<span class="pl-s"><span class="pl-pds">'</span>positive-words.txt<span class="pl-pds">'</span></span>,<span class="pl-v">what</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>character<span class="pl-pds">'</span></span>,<span class="pl-v">comment.char</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>;<span class="pl-pds">'</span></span>)
+<span class="pl-smi">neg</span> <span class="pl-k">&lt;-</span> scan(<span class="pl-s"><span class="pl-pds">'</span>negative-words.txt<span class="pl-pds">'</span></span>,<span class="pl-v">what</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>character<span class="pl-pds">'</span></span>,<span class="pl-v">comment.char</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>;<span class="pl-pds">'</span></span>)
+
+<span class="pl-v">score.sentiment</span> <span class="pl-k">=</span> <span class="pl-k">function</span>(<span class="pl-smi">sentences</span>, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>none<span class="pl-pds">'</span></span>)
+{
+  require(<span class="pl-smi">plyr</span>)
+  require(<span class="pl-smi">stringr</span>)
+
+  <span class="pl-c"># we got a vector of sentences. plyr will handle a list</span>
+  <span class="pl-c"># or a vector as an "l" for us</span>
+  <span class="pl-c"># we want a simple array ("a") of scores back, so we use </span>
+  <span class="pl-c"># "l" + "a" + "ply" = "laply":</span>
+  <span class="pl-v">scores</span> <span class="pl-k">=</span> laply(<span class="pl-smi">sentences</span>, <span class="pl-k">function</span>(<span class="pl-smi">sentence</span>, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>) {
+
+    <span class="pl-c"># clean up sentences with R's regex-driven global substitute, gsub():</span>
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span>[[:punct:]]<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span>[[:cntrl:]]<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> gsub(<span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\\</span>d+<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>, <span class="pl-smi">sentence</span>)
+    <span class="pl-c"># and convert to lower case:</span>
+    <span class="pl-v">sentence</span> <span class="pl-k">=</span> tolower(<span class="pl-smi">sentence</span>)
+
+    <span class="pl-c"># split into words. str_split is in the stringr package</span>
+    <span class="pl-v">word.list</span> <span class="pl-k">=</span> str_split(<span class="pl-smi">sentence</span>, <span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\\</span>s+<span class="pl-pds">'</span></span>)
+    <span class="pl-c"># sometimes a list() is one level of hierarchy too much</span>
+    <span class="pl-v">words</span> <span class="pl-k">=</span> unlist(<span class="pl-smi">word.list</span>)
+
+    <span class="pl-c"># compare our words to the dictionaries of positive &amp; negative terms</span>
+    <span class="pl-v">pos.matches</span> <span class="pl-k">=</span> match(<span class="pl-smi">words</span>, <span class="pl-smi">pos.words</span>)
+    <span class="pl-v">neg.matches</span> <span class="pl-k">=</span> match(<span class="pl-smi">words</span>, <span class="pl-smi">neg.words</span>)
+
+    <span class="pl-c"># match() returns the position of the matched term or NA</span>
+    <span class="pl-c"># we just want a TRUE/FALSE:</span>
+    <span class="pl-v">pos.matches</span> <span class="pl-k">=</span> <span class="pl-k">!</span>is.na(<span class="pl-smi">pos.matches</span>)
+    <span class="pl-v">neg.matches</span> <span class="pl-k">=</span> <span class="pl-k">!</span>is.na(<span class="pl-smi">neg.matches</span>)
+
+    <span class="pl-c"># and conveniently enough, TRUE/FALSE will be treated as 1/0 by sum():</span>
+    <span class="pl-v">score</span> <span class="pl-k">=</span> sum(<span class="pl-smi">pos.matches</span>) <span class="pl-k">-</span> sum(<span class="pl-smi">neg.matches</span>)
+
+    <span class="pl-k">return</span>(<span class="pl-smi">score</span>)
+  }, <span class="pl-smi">pos.words</span>, <span class="pl-smi">neg.words</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span>.<span class="pl-smi">progress</span> )
+
+  <span class="pl-v">scores.df</span> <span class="pl-k">=</span> <span class="pl-k">data.frame</span>(<span class="pl-v">score</span><span class="pl-k">=</span><span class="pl-smi">scores</span>, <span class="pl-v">text</span><span class="pl-k">=</span><span class="pl-smi">sentences</span>)
+  <span class="pl-k">return</span>(<span class="pl-smi">scores.df</span>)
+}
+
+<span class="pl-v">df.sentiment</span> <span class="pl-k">=</span> <span class="pl-smi">df</span>[<span class="pl-smi">bankA.idx</span>,]
+
+<span class="pl-c">#scores = score.sentiment(df.sentiment$FullText, pos, neg, .progress='text')</span>
+<span class="pl-v">scores</span> <span class="pl-k">=</span> score.sentiment(<span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">FullText</span>, <span class="pl-smi">pos</span>, <span class="pl-smi">neg</span>, <span class="pl-v">.progress</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span>)
+<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-v">very.pos</span> <span class="pl-k">=</span> as.numeric(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">score</span> <span class="pl-k">&gt;</span><span class="pl-k">=</span> <span class="pl-c1">2</span>)
+<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-v">very.neg</span> <span class="pl-k">=</span> as.numeric(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">score</span> <span class="pl-k">&lt;</span><span class="pl-k">=</span> <span class="pl-k">-</span><span class="pl-c1">2</span>)
+
+<span class="pl-c"># how many very positives and very negatives</span>
+<span class="pl-v">numpos</span> <span class="pl-k">=</span> sum(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">very.pos</span>)
+<span class="pl-v">numneg</span> <span class="pl-k">=</span> sum(<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-smi">very.neg</span>)
+
+<span class="pl-c"># global score</span>
+<span class="pl-v">global_score</span> <span class="pl-k">=</span> round( <span class="pl-c1">100</span> <span class="pl-k">*</span> <span class="pl-smi">numpos</span> <span class="pl-k">/</span> (<span class="pl-smi">numpos</span> <span class="pl-k">+</span> <span class="pl-smi">numneg</span>) )
+
+<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-v">mediatype</span> <span class="pl-k">=</span> <span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">MediaType</span>
+<span class="pl-smi">scores</span><span class="pl-k">$</span><span class="pl-v">bank</span> <span class="pl-k">=</span> <span class="pl-smi">df</span><span class="pl-k">$</span><span class="pl-smi">BankID</span>
+
+<span class="pl-c"># colors</span>
+<span class="pl-v">cols</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>#7CAE00<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>#00BFC4<span class="pl-pds">"</span></span>)
+names(<span class="pl-smi">cols</span>) <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>twitter<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>facebook<span class="pl-pds">"</span></span>)</pre></div>
+
+<p>After everything is set up, we can create plots. In this case, I chose to work with boxplots.</p>
+
+<h2>
+<a id="create-a-boxplot-for-the-sentiments-by-media-type" class="anchor" href="#create-a-boxplot-for-the-sentiments-by-media-type" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create a Boxplot for the Sentiments by Media Type</h2>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-c"># boxplot</span>
+library(<span class="pl-smi">ggplot2</span>)
+ggplot(<span class="pl-smi">scores</span>, aes(<span class="pl-v">x</span><span class="pl-k">=</span><span class="pl-smi">mediatype</span>, <span class="pl-v">y</span><span class="pl-k">=</span><span class="pl-smi">score</span>, <span class="pl-v">group</span><span class="pl-k">=</span><span class="pl-smi">mediatype</span>)) <span class="pl-k">+</span>
+  geom_boxplot(aes(<span class="pl-v">fill</span><span class="pl-k">=</span><span class="pl-smi">mediatype</span>)) <span class="pl-k">+</span>
+  scale_fill_manual(<span class="pl-v">values</span><span class="pl-k">=</span><span class="pl-smi">cols</span>) <span class="pl-k">+</span>
+  geom_jitter(<span class="pl-v">colour</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>gray40<span class="pl-pds">"</span></span>,<span class="pl-v">position</span><span class="pl-k">=</span>position_jitter(<span class="pl-v">width</span><span class="pl-k">=</span><span class="pl-c1">0.2</span>), <span class="pl-v">alpha</span><span class="pl-k">=</span><span class="pl-c1">0.3</span>) <span class="pl-k">+</span>
+  labs(<span class="pl-v">title</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Media Type's Sentiment Scores<span class="pl-pds">"</span></span>) <span class="pl-k">+</span> 
+  xlab(<span class="pl-s"><span class="pl-pds">'</span>Media Type<span class="pl-pds">'</span></span>) <span class="pl-k">+</span> ylab(<span class="pl-s"><span class="pl-pds">'</span>Sentiment Score<span class="pl-pds">'</span></span>)</pre></div>
+
+<h3>
+<a id="boxplot-for-sentiments-by-media-type" class="anchor" href="#boxplot-for-sentiments-by-media-type" aria-hidden="true"><span class="octicon octicon-link"></span></a>Boxplot for Sentiments by Media Type</h3>
+
+<p><img src="http://i.imgur.com/AldYUAl.png" alt="Boxplot-Media-img"></p>
+
+<p>The boxplot above shows that the sentiments for Twitter are more neutral than the sentiments shown on Facebook. If you look at the spreads of the box plots, the box plot for Facebook has a lot more variability in the sentiment scores. This could be because more people express their true feelings about a business in Facebook statuses because they want other people to know. While this is just a theory, from personal experience, Twitter and Facebook feeds are completely different. Facebook will have a lot of people talking about businesses they have recently visited and the troubles they've had, while Twitter seems to be more of a free form media type. I can't prove this to be true, so I can't come to conclusions based on that.</p>
+
+<h2>
+<a id="create-boxplot-for-sentiments-by-bank" class="anchor" href="#create-boxplot-for-sentiments-by-bank" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create Boxplot for Sentiments by Bank</h2>
+
+<div class="highlight highlight-source-r"><pre><span class="pl-c"># COLORS</span>
+<span class="pl-v">colsN</span> <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>#7CAE00<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>#00BFC4<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>#FFB90F<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>#C39797<span class="pl-pds">"</span></span>)
+names(<span class="pl-smi">colsN</span>) <span class="pl-k">=</span> c(<span class="pl-s"><span class="pl-pds">"</span>Bank A<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Bank B<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Bank C<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>Bank D<span class="pl-pds">"</span></span>)
+<span class="pl-c"># BOXPLOT</span>
+library(<span class="pl-smi">ggplot2</span>)
+ggplot(<span class="pl-smi">scores</span>, aes(<span class="pl-v">x</span> <span class="pl-k">=</span> <span class="pl-smi">bank</span>, <span class="pl-v">y</span> <span class="pl-k">=</span> <span class="pl-smi">score</span>, <span class="pl-v">group</span> <span class="pl-k">=</span> <span class="pl-smi">bank</span>)) <span class="pl-k">+</span>
+  geom_boxplot(aes(<span class="pl-v">fill</span> <span class="pl-k">=</span> <span class="pl-smi">bank</span>)) <span class="pl-k">+</span>
+  scale_fill_manual(<span class="pl-v">values</span> <span class="pl-k">=</span> <span class="pl-smi">colsN</span>) <span class="pl-k">+</span>
+  geom_jitter(<span class="pl-v">colour</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>gray40<span class="pl-pds">"</span></span>,<span class="pl-v">position</span><span class="pl-k">=</span>position_jitter(<span class="pl-v">width</span><span class="pl-k">=</span><span class="pl-c1">0.2</span>), <span class="pl-v">alpha</span><span class="pl-k">=</span><span class="pl-c1">0.3</span>) <span class="pl-k">+</span>
+  labs(<span class="pl-v">title</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>Sentiment Scores by Bank<span class="pl-pds">"</span></span>) <span class="pl-k">+</span> 
+  xlab(<span class="pl-s"><span class="pl-pds">'</span>Bank<span class="pl-pds">'</span></span>) <span class="pl-k">+</span> ylab(<span class="pl-s"><span class="pl-pds">'</span>Sentiment Score<span class="pl-pds">'</span></span>)</pre></div>
+
+<h3>
+<a id="boxplot-for-sentiments-by-bank" class="anchor" href="#boxplot-for-sentiments-by-bank" aria-hidden="true"><span class="octicon octicon-link"></span></a>Boxplot for Sentiments by Bank</h3>
+
+<p><img src="http://i.imgur.com/n0t9xMT.png" alt="Boxplot-Bank-img"></p>
+
+<p>As can be seen above, it looks like BankC has the lowest sentiment score because of where the mean is located on the box plot. If you take a look at this box plot and then take a look at frequent terms, you can come up with theories of why. For example, a bank could have a lower sentiment score because of customer service. These are the types of theories that can be useful to companies, so that they know what to fix within their business.</p>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
